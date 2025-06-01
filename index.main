@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhancing Attendance Through AI-Augmented Workflows</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Hide scrollbars to maintain fixed slide position */
+        }
+        .presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100vh; /* Take full viewport height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .slide {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            position: absolute; /* Position slides absolutely within the container */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center the slide */
+            width: 90%; /* Adjust width as needed */
+            max-width: 960px; /* Max width for readability */
+            height: 90%; /* Adjust height as needed */
+            max-height: 700px; /* Max height for readability */
+            overflow-y: auto; /* Enable scrolling for long content */
+            display: none; /* Hidden by default */
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .slide.active {
+            display: block;
+            opacity: 1;
+        }
+        .slide-header {
+            color: #1e40af;
+            margin-bottom: 1.5rem;
+        }
+        .slide-number {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .feature-box {
+            background-color: #f0f7ff;
+            border-left: 4px solid #1e40af;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .process-arrow {
+            position: relative;
+            margin: 0 15px;
+            color: #1e40af;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        .timeline-item:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #1e40af;
+        }
+        .timeline-item:after {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 20px;
+            height: calc(100% + 10px);
+            border-left: 2px solid #1e40af;
+        }
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        .school-logo {
+            height: 60px;
+            margin-bottom: 20px;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f0f7ff;
+            color: #1e40af;
+        }
+        .navigation-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000; /* Ensure controls are above slides */
+            align-items: center; /* Align items vertically */
+        }
+        .nav-btn {
+            background-color: #1e40af;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .nav-btn:hover:not(:disabled) {
+            background-color: #3b82f6;
+        }
+        .nav-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        .progress-bar-container {
+            width: 80%;
+            max-width: 960px;
+            background-color: #e5e7eb;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            position: fixed; /* Fixed at the top */
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #1e40af;
+            border-radius: 4px;
+            transition: width 0.5s ease-in-out;
+        }
+        .audio-playback-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1e40af;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .audio-playback-controls button {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: inherit;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        .audio-playback-controls button:hover {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <header class="text-center mb-12" style="display: none;">
+        <h1 class="text-4xl font-bold text-blue-900 mb-4">Enhancing Attendance Through AI-Augmented Workflows</h1>
+        <p class="text-xl text-gray-600">A Strategic Approach for Hartley Brook Primary Academy</p>
+        <div class="mt-4 text-gray-500">Prepared for Kay Godfrey, Regional Director at Astrea Academy Trust</div>
+    </header>
+
+    <div class="presentation-container">
+        <section id="slide-1" class="slide">
+            <h2 class="slide-header text-3xl font-bold">Our Reality at Hartley Brook - Challenge & Opportunity</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Current Position:</h3>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><span class="font-semibold">91.2%</span> overall attendance (vs. <span class="font-semibold text-red-600">95%</span> target)</li>
+                        <li><span class="font-semibold">29.4%</span> Persistent Absence (~160 students)</li>
+                        <li>Currently ranked <span class="font-semibold">last in attendance</span> across the Trust</li>
+                        <li>EYFS attendance at just <span class="font-semibold">88%</span></li>
+                        <li>~14 cases of Severe Absence (<50%)</li>
+                    </ul>
+                    
+                    <div class="mt-6">
+                        <h3 class="text-xl font-semibold text-blue-800 mb-4">Our Context:</h3>
+                        <p class="text-gray-700">Serving Shiregreen: One of Sheffield's largest primaries in an area of high deprivation.</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-blue-50 p-5 rounded-lg border-l-4 border-blue-500">
+                        <h3 class="text-xl font-semibold text-blue-800 mb-3">The Human Impact</h3>
+                        <p class="text-gray-700 mb-4">Behind these numbers are children missing crucial learning opportunities every day. In a community where education already faces significant barriers, we cannot afford business as usual.</p>
+                        <p class="text-blue-800 font-semibold">However, within this challenge lies our greatest opportunity for transformation.</p>
+                    </div>
+                    
+                    <div class="mt-6 bg-gray-100 p-4 rounded-lg">
+                        <h4 class="font-medium text-gray-800 mb-2">Key Insight:</h4>
+                        <p class="text-gray-700 italic">"Attendance is our number one barrier to improving outcomes for our children."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slide-number">1/9</div>
+            <audio id="audio-1" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%201%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-2" class="slide">
+            <h2 class="slide-header text-3xl font-bold">Current Workflow: Overwhelmed by Admin</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Our Small Team:</h3>
+                    <ul class="list-disc pl-6 space-y-1">
+                        <li>1 Attendance Officer</li>
+                        <li>1 Attendance Welfare Manager</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold text-blue-800 mt-6 mb-4">Daily Administrative Burden:</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-medium">First-day calling</span>
+                                <span class="text-sm text-gray-600 block">60-90 mins daily</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-medium">Manual register checks</span>
+                                <span class="text-sm text-gray-600 block">30-45 mins daily</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-medium">Data entry and coding checks</span>
+                                <span class="text-sm text-gray-600 block">45-60 mins daily</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-medium">Sending repeated messaging</span>
+                                <span class="text-sm text-gray-600 block">30-45 mins daily</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-medium">Attendance tracking and analysis</span>
+                                <span class="text-sm text-gray-600 block">60-90 mins daily</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="font-medium">Multi-agency collaboration</span>
+                                <span class="text-sm text-gray-600 block">Limited capacity</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <div class="bg-red-50 p-5 rounded-lg mb-6">
+                        <h3 class="text-xl font-semibold text-red-700 mb-3">The Imbalance:</h3>
+                        <div class="flex justify-center mb-4">
+                            <div class="text-center px-4">
+                                <div class="h-32 w-32 mx-auto rounded-full flex items-center justify-center bg-red-200 border-4 border-red-400">
+                                    <div>
+                                        <span class="block text-3xl font-bold text-red-600">70%</span>
+                                        <span class="text-sm text-red-600">Admin Tasks</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center px-4">
+                                <div class="h-32 w-32 mx-auto rounded-full flex items-center justify-center bg-green-100 border-4 border-green-300">
+                                    <div>
+                                        <span class="block text-3xl font-bold text-green-600">30%</span>
+                                        <span class="text-sm text-green-600">Engagement</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-700">Our dedicated team spends the majority of their time on low-value administrative tasks rather than the high-impact family engagement that moves the needle on attendance.</p>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-5 rounded-lg">
+                        <h3 class="text-xl font-semibold text-yellow-700 mb-2">The Bottleneck</h3>
+                        <p class="text-gray-700">With nearly 160 persistent absentees, this approach simply cannot scale to meet our challenge - particularly in early years where we're seeing the most concerning trends.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slide-number">2/9</div>
+            <audio id="audio-2" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%202%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-3" class="slide">
+            <h2 class="slide-header text-3xl font-bold">A Strategic Leap: Augmenting Our Efforts with AI</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="md:col-span-4">
+                    <div class="bg-red-50 p-5 rounded-lg text-center">
+                        <h3 class="font-semibold text-lg mb-2">CURRENT STATE</h3>
+                        <div class="text-red-600 text-3xl font-bold mb-2">70% Admin Tasks</div>
+                        <div class="text-green-600 text-xl">30% High-Value Interaction</div>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-4">
+                    <div class="bg-blue-50 p-5 rounded-lg text-center">
+                        <h3 class="font-semibold text-lg mb-2">AI AUGMENTATION</h3>
+                        <div class="flex justify-center space-x-2 mb-2">
+                            <div class="bg-blue-100 rounded p-2">Bromcom</div>
+                            <div class="bg-blue-100 rounded p-2">+</div>
+                            <div class="bg-blue-100 rounded p-2">CoPilot</div>
+                        </div>
+                        <div class="text-blue-600">
+                            <i class="fas fa-robot text-2xl"></i>
+                            <i class="fas fa-plus text-sm mx-1"></i>
+                            <i class="fas fa-user text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:col-span-4">
+                    <div class="bg-green-50 p-5 rounded-lg text-center">
+                        <h3 class="font-semibold text-lg mb-2">FUTURE STATE</h3>
+                        <div class="text-red-600 text-xl mb-2">30% Admin Tasks</div>
+                        <div class="text-green-600 text-3xl font-bold">70% High-Value Interaction</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Our Strategic Approach:</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-lg"></i>
+                            <span>Use AI to handle repetitive admin tasks</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-lg"></i>
+                            <span>Free human time for relationship-building</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-lg"></i>
+                            <span>Leverage existing platforms: Bromcom MIS + Microsoft 365 (with CoPilot)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mt-1 mr-3 text-lg"></i>
+                            <span><strong>Embedding a systemised approach</strong> - not introducing new systems</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="mt-8 bg-blue-100 p-4 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-2">Target:</h4>
+                        <p class="text-blue-800">Shift from 30/70 to 70/30 engagement/admin ratio</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-blue-800 mb-4">AI-Handled Tasks:</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 p-3 rounded flex items-center">
+                                <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                                <span>Report generation</span>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded flex items-center">
+                                <i class="fas fa-sort-amount-up text-blue-500 mr-2"></i>
+                                <span>Case prioritization</span>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded flex items-center">
+                                <i class="fas fa-pen text-blue-500 mr-2"></i>
+                                <span>Draft communications</span>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded flex items-center">
+                                <i class="fas fa-clipboard text-blue-500 mr-2"></i>
+                                <span>Meeting notes</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-semibold text-green-700 mb-4">High-Value Activities:</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-green-50 p-3 rounded flex items-center">
+                                <i class="fas fa-home text-green-500 mr-2"></i>
+                                <span>More home visits</span>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded flex items-center">
+                                <i class="fas fa-users text-green-500 mr-2"></i>
+                                <span>Parent workshops</span>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded flex items-center">
+                                <i class="fas fa-hands-helping text-green-500 mr-2"></i>
+                                <span>Family & Pupil Support planning</span>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded flex items-center">
+                                <i class="fas fa-comments text-green-500 mr-2"></i>
+                                <span>Quality conversations</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slide-number">3/9</div>
+            <audio id="audio-3" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%203%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-4" class="slide">
+            <h2 class="slide-header text-3xl font-bold">AI in Action - Maximising Bromcom & Microsoft</h2>
+            
+            <div class="grid grid-cols-1 gap-8">
+                <div class="feature-box">
+                    <h3 class="text-xl font-semibold text-blue-800 mb-3">1) Predictive Data Analysis</h3>
+                    <div class="pl-2 flex flex-wrap items-center mb-2">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded mr-2 mb-2">Bromcom AI</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded mr-2 mb-2">Microsoft CoPilot</span>
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded mr-2 mb-2">Power BI</span>
+                    </div>
+                    <ul class="space-y-2 pl-6 list-disc">
+                        <li>Pattern detection across attendance data</li>
+                        <li>Early identification of 'tipping point' indicators</li>
+                        <li>Cohort analysis to target interventions</li>
+                    </ul>
+                    <div class="mt-3 pl-6">
+                        <div class="text-blue-700 font-medium">ACTION: <span class="font-normal text-gray-700">Fully implement Bromcom's AI/BI features</span></div>
+                    </div>
+                </div>
+                
+                <div class="feature-box">
+                    <h3 class="text-xl font-semibold text-blue-800 mb-3">2) Generative AI & Summarization</h3>
+                    <div class="pl-2 flex flex-wrap items-center mb-2">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded mr-2 mb-2">Microsoft CoPilot</span>
+                    </div>
+                    <ul class="space-y-2 pl-6 list-disc">
+                        <li>Personalized parent communications</li>
+                        <li>Quick summarization of DfE guidance</li>
+                        <li>Tailored letter templates based on absence patterns</li>
+                    </ul>
+                    <div class="mt-3 pl-6">
+                        <div class="text-blue-700 font-medium">ACTION: <span class="font-normal text-gray-700">Explore CoPilot upgrades for enhanced features</span></div>
+                    </div>
+                </div>
+                
+                <div class="feature-box">
+                    <h3 class="text-xl font-semibold text-blue-800 mb-3">3) Workflow Automation</h3>
+                    <div class="pl-2 flex flex-wrap items-center mb-2">
+                        <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded mr-2 mb-2">Microsoft Power Automate</span>
+                    </div>
+                    <ul class="space-y-2 pl-6 list-disc">
+                        <li>Automated absence logging & categorization</li>
+                        <li>Streamlined reporting workflows</li>
+                        <li>Integration with Bromcom where possible</li>
+                    </ul>
+                    <div class="mt-3 pl-6">
+                        <div class="text-blue-700 font-medium">ACTION: <span class="font-normal text-gray-700">Pilot simple automation workflows</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 bg-gray-50 p-4 rounded-lg text-center">
+                <p class="text-gray-700 italic">"By fully leveraging these capabilities within our existing tech stack, we can transform how we manage attendance without significant new investment."</p>
+            </div>
+            
+            <div class="slide-number">4/9</div>
+            <audio id="audio-4" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%204%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-5" class="slide">
+            <h2 class="slide-header text-3xl font-bold">Enhanced Meeting Capture - Responsible Audio Recording</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Key Benefits:</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-smile text-blue-600"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium">Staff fully present in meetings</span>
+                                <span class="text-sm text-gray-600 block">Better engagement with families</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-microphone text-blue-600"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium">Complete capture of nuanced conversations</span>
+                                <span class="text-sm text-gray-600 block">No details missed during complex discussions</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-robot text-blue-600"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium">Rapid AI transcription and summarization</span>
+                                <span class="text-sm text-gray-600 block">Microsoft CoPilot transforms recordings into actionable notes</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-file-alt text-blue-600"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium">Richer documentation for CPOMs and attendance action plans</span>
+                                <span class="text-sm text-gray-600 block">Better evidence for interventions and safeguarding</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-clock text-blue-600"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium">Estimated time saving: 45-60 minutes per meeting</span>
+                                <span class="text-sm text-gray-600 block">Multiplied across dozens of meetings weekly</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Responsible Implementation:</h3>
+                    <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                <i class="fas fa-clipboard-check text-blue-600"></i>
+                            </div>
+                            <span class="font-medium">Clear consent protocols aligned with GDPR</span>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                <i class="fas fa-lock text-blue-600"></i>
+                            </div>
+                            <span class="font-medium">Secure storage within Microsoft environment</span>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                <i class="fas fa-calendar-times text-blue-600"></i>
+                            </div>
+                            <span class="font-medium">Limited retention periods with automatic deletion</span>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                <i class="fas fa-user-check text-blue-600"></i>
+                            </div>
+                            <span class="font-medium">'Human-in-the-loop' review of all AI-generated summaries</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                <i class="fas fa-graduation-cap text-blue-600"></i>
+                            </div>
+                            <span class="font-medium">Training for all staff on ethical recording practices</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-100 p-4 rounded-lg border-2 border-blue-300">
+                        <h4 class="font-semibold text-blue-800 mb-2">Audio Recording & Transcription Workflow:</h4>
+                        <div class="flex items-center justify-between flex-wrap">
+                            <div class="bg-white rounded p-2 text-center mb-2">
+                                <i class="fas fa-microphone text-blue-600 text-xl mb-1"></i>
+                                <div class="text-sm">Record</div>
+                            </div>
+                            <i class="fas fa-arrow-right text-blue-600"></i>
+                            <div class="bg-white rounded p-2 text-center mb-2">
+                                <i class="fas fa-file-alt text-blue-600 text-xl mb-1"></i>
+                                <div class="text-sm">Transcribe</div>
+                            </div>
+                            <i class="fas fa-arrow-right text-blue-600"></i>
+                            <div class="bg-white rounded p-2 text-center mb-2">
+                                <i class="fas fa-list text-blue-600 text-xl mb-1"></i>
+                                <div class="text-sm">Summarize</div>
+                            </div>
+                            <i class="fas fa-arrow-right text-blue-600"></i>
+                            <div class="bg-white rounded p-2 text-center mb-2">
+                                <i class="fas fa-user-check text-blue-600 text-xl mb-1"></i>
+                                <div class="text-sm">Review</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slide-number">5/9</div>
+            <audio id="audio-5" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%205%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-6" class="slide">
+            <h2 class="slide-header text-3xl font-bold">The Impact - Saving Time, Increasing Impact</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Potential Time Savings:</h3>
+                    <div class="bg-green-50 p-5 rounded-lg mb-6">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-clock text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium text-lg">15 hours/week</span>
+                                <span class="text-gray-600 block">on administrative tasks</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-calendar-alt text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium text-lg">60 hours/month</span>
+                                <span class="text-gray-600 block">redirected to high-value activities</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-comments text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium text-lg">85% reduction</span>
+                                <span class="text-gray-600 block">in time spent on routine communications</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-microphone text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <span class="font-medium text-lg">45-60 minutes saved</span>
+                                <span class="text-gray-600 block">per meeting with audio capture</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Additional Benefits:</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-blue-600 mt-1 mr-2"></i>
+                                <span>Faster response to absence (same day vs. next day)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-blue-600 mt-1 mr-2"></i>
+                                <span>More consistent communications</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-blue-600 mt-1 mr-2"></i>
+                                <span>Better data for leadership decisions</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-blue-600 mt-1 mr-2"></i>
+                                <span>Staff burnout reduction</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Reinvestment of Time:</h3>
+                    
+                    <div class="bg-blue-50 p-5 rounded-lg">
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                    <i class="fas fa-home text-blue-600"></i>
+                                </div>
+                                <div class="font-medium">+40% more home visits for complex cases</div>
+                            </div>
+                            <div class="mt-2 ml-13 pl-12 text-gray-600">
+                                Building relationships with our hardest-to-reach families
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                    <i class="fas fa-calendar-check text-blue-600"></i>
+                                </div>
+                                <div class="font-medium">New weekly attendance clinics for parents</div>
+                            </div>
+                            <div class="mt-2 ml-13 pl-12 text-gray-600">
+                                Proactive support before absence becomes persistent
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                    <i class="fas fa-users text-blue-600"></i>
+                                </div>
+                                <div class="font-medium">Enhanced multi-agency collaboration</div>
+                            </div>
+                            <div class="mt-2 ml-13 pl-12 text-gray-600">
+                                More time for complex case discussions with partners
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                    <i class="fas fa-child text-blue-600"></i>
+                                </div>
+                                <div class="font-medium">Personalized intervention for EYFS families</div>
+                            </div>
+                            <div class="mt-2 ml-13 pl-12 text-gray-600">
+                                Targeting our lowest attendance group with intensive support
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-3 border-l-4 border-yellow-400 bg-yellow-50">
+                        <p class="italic text-gray-700">"This isn't just about efficiency—it's about effectiveness. By redirecting our time from administrative tasks to meaningful family engagement, we can fundamentally change our approach to persistent absence."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slide-number">6/9</div>
+            <audio id="audio-6" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%206%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-7" class="slide">
+            <h2 class="slide-header text-3xl font-bold">Responsible Innovation - Leveraging Our Secure Environment</h2>
+            
+            <div class="mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                    <div class="flex flex-wrap items-center justify-center gap-6">
+                        <div class="text-center px-4">
+                            <i class="fas fa-shield-alt text-blue-700 text-2xl mb-2"></i>
+                            <div class="text-sm font-medium">Enterprise Security</div>
+                        </div>
+                        <div class="text-center px-4">
+                            <i class="fas fa-database text-blue-700 text-2xl mb-2"></i>
+                            <div class="text-sm font-medium">Data Sovereignty</div>
+                        </div>
+                        <div class="text-center px-4">
+                            <i class="fas fa-user-lock text-blue-700 text-2xl mb-2"></i>
+                            <div class="text-sm font-medium">Role-Based Access</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center text-gray-700">
+                        By leveraging Microsoft and Bromcom within our existing Trust environment, we maintain all current data protection standards while enhancing workflow capabilities.
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-4 mb-4">
+                    <div class="bg-blue-100 text-blue-800 px-4 py-1 rounded">Microsoft</div>
+                    <div class="bg-blue-100 text-blue-800 px-4 py-1 rounded">Bromcom</div>
+                    <div class="bg-blue-100 text-blue-800 px-4 py-1 rounded">DfE</div>
+                    <div class="bg-blue-100 text-blue-800 px-4 py-1 rounded">ICO</div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">Data Protection</h3>
+                        <p class="mb-2"><span class="font-medium">Risk:</span> Unauthorized data access</p>
+                        <p class="mb-2 font-medium">Our approach:</p>
+                        <ul class="pl-5 list-disc space-y-1">
+                            <li>Microsoft's UK data residency</li>
+                            <li>No new data storage platforms</li>
+                            <li>Compliance with Trust GDPR policy</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">Audio Recording</h3>
+                        <p class="mb-2"><span class="font-medium">Risk:</span> Privacy concerns</p>
+                        <p class="mb-2 font-medium">Our approach:</p>
+                        <ul class="pl-5 list-disc space-y-1">
+                            <li>Clear written consent process</li>
+                            <li>Time-limited retention policy</li>
+                            <li>Secure storage in Teams/OneDrive</li>
+                            <li>'Human-in-the-loop' review of all AI-generated summaries</li>
+                            <li>Training for all staff on ethical recording practices</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">Bias & Fairness</h3>
+                        <p class="mb-2"><span class="font-medium">Risk:</span> AI reinforcing inequalities</p>
+                        <p class="mb-2 font-medium">Our approach:</p>
+                        <ul class="pl-5 list-disc space-y-1">
+                            <li>Human review of all suggestions</li>
+                            <li>Regular bias audits</li>
+                            <li>Diverse testing groups</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">Operational Risk</h3>
+                        <p class="mb-2"><span class="font-medium">Risk:</span> Over-reliance on automation</p>
+                        <p class="mb-2 font-medium">Our approach:</p>
+                        <ul class="pl-5 list-disc space-y-1">
+                            <li>Phased implementation with evaluation</li>
+                            <li>Manual fallback processes</li>
+                            <li>Clear escalation procedures</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8">
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold text-blue-800 mb-3 text-center">Audio Recording & Transcription: Ethical Framework</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-3 rounded-lg text-center">
+                            <div class="mb-2"><i class="fas fa-file-contract text-green-600 text-xl"></i></div>
+                            <div class="text-sm">Explicit Purpose Statement</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg text-center">
+                            <div class="mb-2"><i class="fas fa-hand-paper text-green-600 text-xl"></i></div>
+                            <div class="text-sm">Right to Withdraw Consent</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg text-center">
+                            <div class="mb-2"><i class="fas fa-calendar-times text-green-600 text-xl"></i></div>
+                            <div class="text-sm">30-Day Deletion Policy</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg text-center">
+                            <div class="mb-2"><i class="fas fa-user-shield text-green-600 text-xl"></i></div>
+                            <div class="text-sm">No Third-Party Processing</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8">
+                <h3 class="text-xl font-semibold text-blue-800 mb-4">Our AI Governance Framework</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+                            <h4 class="font-medium">Data Protection Impact Assessment (DPIA)</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Completed for each workflow before expanding</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-sync-alt text-blue-600 mr-2"></i>
+                            <h4 class="font-medium">Regular Reviews</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Monthly assessment of all AI-augmented processes</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-comments text-blue-600 mr-2"></i>
+                            <h4 class="font-medium">Stakeholder Feedback</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">Input from staff, parents and Trust leadership</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 bg-blue-50 p-4 rounded-lg">
+                <h4 class="font-medium text-center text-blue-800 mb-2">Key Assurance: Low Risk Implementation Strategy</h4>
+                <p class="text-center">We're maximizing existing secure platforms - not introducing new risks</p>
+            </div>
+            
+            <div class="slide-number">7/9</div>
+            <audio id="audio-7" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%207%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-8" class="slide">
+            <h2 class="slide-header text-3xl font-bold">Implementation Roadmap - Phased and Measured</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-blue-50 rounded-lg p-5">
+                    <div class="bg-blue-100 rounded-lg text-center p-2 mb-4">
+                        <h3 class="text-xl font-semibold text-blue-800">Phase 1: Foundation</h3>
+                        <div class="text-gray-600 text-sm">Term 1</div>
+                    </div>
+                    
+                    <ul class="space-y-3">
+                        <li class="timeline-item">
+                            <div class="font-medium">Bromcom attendance dashboard optimization</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Basic Microsoft CoPilot implementation for communications</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Initial audio recording protocols for key meetings</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Staff training on AI-augmented workflows</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Baseline data collection for impact measurement</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-5">
+                    <div class="bg-blue-100 rounded-lg text-center p-2 mb-4">
+                        <h3 class="text-xl font-semibold text-blue-800">Phase 2: Enhancement</h3>
+                        <div class="text-gray-600 text-sm">Term 2</div>
+                    </div>
+                    
+                    <ul class="space-y-3">
+                        <li class="timeline-item">
+                            <div class="font-medium">Power BI integration with Bromcom for predictive analytics</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Expanded CoPilot use for personalized communications</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Refined audio capture with improved summarization</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">First Power Automate workflows for routine tasks</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Mid-point impact assessment</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-5">
+                    <div class="bg-blue-100 rounded-lg text-center p-2 mb-4">
+                        <h3 class="text-xl font-semibold text-blue-800">Phase 3: Optimization</h3>
+                        <div class="text-gray-600 text-sm">Term 3</div>
+                    </div>
+                    
+                    <ul class="space-y-3">
+                        <li class="timeline-item">
+                            <div class="font-medium">Full integration of predictive analytics into daily workflow</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Comprehensive automated communications framework</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Complete Power Automate attendance workflows</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Advanced meeting capture and documentation system</div>
+                        </li>
+                        <li class="timeline-item">
+                            <div class="font-medium">Full impact evaluation and Trust-wide sharing</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8">
+                <table class="w-full">
+                    <thead>
+                        <tr>
+                            <th>Implementation Milestone</th>
+                            <th>Owner</th>
+                            <th>Timeline</th>
+                            <th>Success Indicator</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Initial Bromcom dashboard setup</td>
+                            <td>Attendance Officer</td>
+                            <td>Month 1</td>
+                            <td>Daily attendance patterns visible</td>
+                        </tr>
+                        <tr>
+                            <td>CoPilot communication templates</td>
+                            <td>Attendance Welfare Manager</td>
+                            <td>Month 2</td>
+                            <td>30% reduction in communication time</td>
+                        </tr>
+                        <tr>
+                            <td>First audio-recorded meeting pilot</td>
+                            <td>Attendance Lead + DSL</td>
+                            <td>Month 2</td>
+                            <td>5 successful recordings with summaries</td>
+                        </tr>
+                        <tr>
+                            <td>Initial Power Automate workflow</td>
+                            <td>IT Support + Attendance Team</td>
+                            <td>Month 4</td>
+                            <td>Automated first-day absence tracking</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-6 bg-blue-50 p-4 rounded-lg text-center">
+                <p class="text-gray-700 italic">"Our implementation approach is methodical and measured, building capability while demonstrating impact at each stage."</p>
+            </div>
+            
+            <div class="slide-number">8/9</div>
+            <audio id="audio-8" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%208%20presentation.mp3" preload="auto"></audio>
+        </section>
+
+        <section id="slide-9" class="slide">
+            <h2 class="slide-header text-3xl font-bold">Our Vision & Your Support - Leading the Way</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <div class="hero-section">
+                        <h3 class="text-2xl font-semibold mb-6">Our Call to Action</h3>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="bg-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-blue-800 font-bold">1</div>
+                                <div class="text-white">
+                                    <div class="font-medium">Approval for a phased pilot program</div>
+                                    <div class="text-blue-100 text-sm">focusing on Bromcom and CoPilot</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-blue-800 font-bold">2</div>
+                                <div class="text-white">
+                                    <div class="font-medium">Support to investigate upgrading our Microsoft CoPilot plan</div>
+                                    <div class="text-blue-100 text-sm">for enhanced features and security</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-blue-800 font-bold">3</div>
+                                <div class="text-white">
+                                    <div class="font-medium">Collaboration with Trust IT/Data</div>
+                                    <div class="text-blue-100 text-sm">to fully leverage Bromcom's AI/Power BI features</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="bg-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-blue-800 font-bold">4</div>
+                                <div class="text-white">
+                                    <div class="font-medium">Resource allocation for training and development</div>
+                                    <div class="text-blue-100 text-sm">on these platforms</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <div class="text-2xl font-bold text-blue-800">From Last to Leader</div>
+                        <p class="text-gray-600 mt-2">With your support, we can transform attendance at Hartley Brook and create a model for the Trust</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-800 mb-4">Expected Outcomes:</h3>
+                    
+                    <div class="bg-blue-50 p-5 rounded-lg mb-6">
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center">
+                                <div class="font-medium">Attendance improvement</div>
+                                <div class="bg-blue-100 rounded px-3 py-1 text-blue-800 font-bold">93%</div>
+                            </div>
+                            <div class="mt-1 text-sm text-gray-600">within 12 months</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 93%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center">
+                                <div class="font-medium">Persistent absence reduction</div>
+                                <div class="bg-blue-100 rounded px-3 py-1 text-blue-800 font-bold">below 20%</div>
+                            </div>
+                            <div class="mt-1 text-sm text-gray-600">from current 29.4%</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                <div class="bg-green-500 h-2.5 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-flag text-blue-600 mr-2"></i>
+                                <div class="font-medium">Position Hartley Brook as a Trust-wide model</div>
+                            </div>
+                            <div class="mt-1 ml-7 text-sm text-gray-600">for AI-enhanced attendance management</div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center">
+                                <i class="fas fa-share-alt text-blue-600 mr-2"></i>
+                                <div class="font-medium">Create a scalable framework</div>
+                            </div>
+                            <div class="mt-1 ml-7 text-sm text-gray-600">that other academies can adopt</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 border border-blue-300 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-3">Longer-term Vision</h4>
+                        <p class="text-gray-700 mb-4">This pilot at Hartley Brook will establish a model for attendance management that leverages AI to enhance human connections, not replace them.</p>
+                        <p class="text-gray-700">Success here can inform broader Trust-wide approaches to using technology to address persistent challenges across multiple academies.</p>
+                    </div>
+                    
+                    <div class="mt-6 bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                        <h4 class="font-medium text-yellow-800 mb-2">Return on Investment</h4>
+                        <p class="text-gray-700">Every 1% improvement in attendance equates to approximately 5 additional days of learning per child per year.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slide-number">9/9</div>
+            <audio id="audio-9" src="https://github.com/CJLee1970/aiaugmentedattendance/raw/refs/heads/main/audio%209%20presentation.mp3" preload="auto"></audio>
+        </section>
+    </div>
+
+    <footer class="mt-20 text-center text-gray-500 text-sm" style="display: none;">
+        <p>Hartley Brook Primary Academy | Astrea Academy Trust</p>
+        <p class="mt-2">Enhancing Attendance Through AI-Augmented Workflows | May 2025</p>
+    </footer>
+
+    <div class="navigation-controls">
+        <button id="prevBtn" class="nav-btn">
+            <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <div class="audio-playback-controls">
+            <button id="playPauseBtn">
+                <i class="fas fa-volume-up mr-2"></i> Audio
+            </button>
+        </div>
+        <button id="nextBtn" class="nav-btn">
+            Next <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlideIndex = 0;
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const progressBar = document.getElementById('progressBar');
+            let currentAudio = null;
+
+            function updateProgressBar() {
+                const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+
+            function showSlide(index) {
+                // Stop current audio if playing
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                    playPauseBtn.innerHTML = '<i class="fas fa-volume-up mr-2"></i> Audio'; // Reset button text
+                }
+
+                slides.forEach((slide, i) => {
+                    if (i === index) {
+                        slide.classList.add('active');
+                        slide.classList.remove('hidden'); // Ensure it's not hidden by other means
+                        const slideNumberDiv = slide.querySelector('.slide-number');
+                        if (slideNumberDiv) {
+                            slideNumberDiv.textContent = `${index + 1}/${totalSlides}`;
+                        }
+
+                        // Set current audio for the active slide
+                        currentAudio = slide.querySelector('audio');
+                        if (currentAudio) {
+                            const playPromise = currentAudio.play();
+                            if (playPromise !== undefined) {
+                                playPromise.then(_ => {
+                                    // Autoplay started!
+                                    playPauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i> Pause Audio';
+                                    playPauseBtn.disabled = false; // Enable button if it was disabled
+                                }).catch(error => {
+                                    // Autoplay failed. This is likely due to user gesture requirement.
+                                    console.log('Autoplay prevented:', error);
+                                    playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Play Audio';
+                                    playPauseBtn.disabled = false; // Ensure button is enabled for manual play
+                                });
+                            }
+                        } else {
+                            playPauseBtn.innerHTML = '<i class="fas fa-volume-mute mr-2"></i> No Audio';
+                            playPauseBtn.disabled = true;
+                        }
+
+                    } else {
+                        slide.classList.remove('active');
+                        slide.classList.add('hidden'); // Hide non-active slides
+                    }
+                });
+
+                prevBtn.disabled = index === 0;
+                nextBtn.disabled = index === totalSlides - 1;
+                updateProgressBar();
+            }
+
+            function toggleAudioPlayPause() {
+                if (currentAudio) {
+                    if (currentAudio.paused) {
+                        currentAudio.play();
+                        playPauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i> Pause Audio';
+                    } else {
+                        currentAudio.pause();
+                        playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Play Audio';
+                    }
+                }
+            }
+
+            function nextSlide() {
+                if (currentSlideIndex < totalSlides - 1) {
+                    currentSlideIndex++;
+                    showSlide(currentSlideIndex);
+                }
+            }
+
+            function prevSlide() {
+                if (currentSlideIndex > 0) {
+                    currentSlideIndex--;
+                    showSlide(currentSlideIndex);
+                }
+            }
+
+            // Event Listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            playPauseBtn.addEventListener('click', toggleAudioPlayPause);
+
+            // Optional: Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            });
+
+            // Initial slide display
+            showSlide(currentSlideIndex);
+        });
+    </script>
+</body>
+</html>
